@@ -1,195 +1,158 @@
 package lab9;
 
-import javax.swing.*;
-import java.awt.*;
-import java.awt.event.*;
-import java.util.ArrayList;
-import java.util.List;
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Graphics;
+import java.awt.event.MouseEvent;
+
+import javax.swing.ButtonGroup;
+import javax.swing.JButton;
+import javax.swing.JFrame;
+import javax.swing.JPanel;
+import javax.swing.JRadioButton;
+import javax.swing.SwingUtilities;
+import javax.swing.event.MouseInputAdapter;
 
 public class Lab9 extends JFrame {
 
-    private static final long serialVersionUID = 1L;
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+	private Color currentColor = Color.RED;
 
-    private Color currentColor = Color.RED;
-    private int currentShape = 1; 
-    private final List<ShapeData> shapes = new ArrayList<>();
-    private int startX, startY, endX, endY;
-    private boolean isDragging = false;
+	public Lab9() {
+		setTitle("BorderLayout Example");
+		setSize(500, 400);
+		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		setLocationRelativeTo(null);
 
-    private JPanel centerPanel;
+		// BorderLayout is default for JFrame content pane
+		setLayout(new BorderLayout(10, 10));
 
-    // Shape data
-    private static class ShapeData {
-        int type;
-        int x1, y1, x2, y2;
-        Color color;
+		JPanel northPanel = new JPanel();
+		northPanel.setBackground(Color.pink);
+		// Red button
+		JButton redBtn = new JButton("Red");
+		redBtn.setBackground(Color.RED);
+		redBtn.setForeground(Color.WHITE);
+		redBtn.setFocusPainted(false);
 
-        ShapeData(int type, int x1, int y1, int x2, int y2, Color color) {
-            this.type = type;
-            this.x1 = x1;
-            this.y1 = y1;
-            this.x2 = x2;
-            this.y2 = y2;
-            this.color = color;
-        }
-    }
+		// Blue button
+		JButton blueBtn = new JButton("Blue");
+		blueBtn.setBackground(Color.BLUE);
+		blueBtn.setForeground(Color.WHITE);
+		blueBtn.setFocusPainted(false);
 
-    public Lab9() {
-        setTitle("Shape Drawer");
-        setSize(600, 450);
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setLocationRelativeTo(null);
-        setLayout(new BorderLayout(10, 10));
+		// Radio buttons with borders
+		JRadioButton square = new JRadioButton("Square");
+		JRadioButton oval = new JRadioButton("Oval");
+		JRadioButton fill = new JRadioButton("Fill");
+		JRadioButton outline = new JRadioButton("Outline");
 
-        add(createToolbar(), BorderLayout.NORTH);
-        centerPanel = createDrawingPanel();
-        add(centerPanel, BorderLayout.CENTER);
-        setJMenuBar(createMenuBar());
+		ButtonGroup shapeGroup = new ButtonGroup();
+		shapeGroup.add(square);
+		shapeGroup.add(oval);
 
-        addMouseHandlers();
+		// Group: Fill OR Outline
+		ButtonGroup styleGroup = new ButtonGroup();
+		styleGroup.add(fill);
+		styleGroup.add(outline);
 
-        setVisible(true);
-    }
+		// Default selections
+		square.setSelected(true);
+		fill.setSelected(true);
+		// Add to panel
+		northPanel.add(redBtn);
+		northPanel.add(blueBtn);
+		northPanel.add(square);
+		northPanel.add(oval);
+		northPanel.add(fill);
+		northPanel.add(outline);
 
-    // ------------------------
-    // Toolbar
-    // ------------------------
-    private JToolBar createToolbar() {
-        JToolBar toolbar = new JToolBar();
-        ButtonGroup colorGroup = new ButtonGroup();
+		JPanel westPanel = new JPanel();
+		westPanel.setBackground(Color.pink);
 
-        toolbar.add(createColorButton("Red", Color.RED, colorGroup, true));
-        toolbar.add(createColorButton("Blue", Color.BLUE, colorGroup, false));
-        toolbar.add(createColorButton("Yellow", Color.YELLOW, colorGroup, false));
+		JButton clearAll = new JButton("Clear All");
+		westPanel.add(clearAll);
 
-        return toolbar;
-    }
+		JPanel centerPanel = new JPanel();
+		centerPanel.setBackground(Color.YELLOW);
 
-    private JRadioButton createColorButton(String name, Color color, ButtonGroup group, boolean selected) {
-        JRadioButton btn = new JRadioButton(name, selected);
-        btn.setFocusPainted(false);
-        btn.addActionListener(e -> currentColor = color);
-        group.add(btn);
-        return btn;
-    }
+		add(northPanel, BorderLayout.NORTH);
+		add(westPanel, BorderLayout.WEST);
+		add(centerPanel, BorderLayout.CENTER);
 
-    // ------------------------
-    // Drawing panel
-    // ------------------------
-    private JPanel createDrawingPanel() {
-        JPanel panel = new JPanel() {
-            private static final long serialVersionUID = 1L;
+		redBtn.addActionListener(e -> currentColor = Color.RED);
 
-            @Override
-            protected void paintComponent(Graphics g) {
-                super.paintComponent(g);
-                drawAllShapes(g);
-            }
-        };
-        panel.setBackground(Color.LIGHT_GRAY);
-        return panel;
-    }
+		blueBtn.addActionListener(e -> currentColor = Color.BLUE);
+		ComponentWrangler handler = new ComponentWrangler(centerPanel, square, oval, fill, outline);
+		centerPanel.addMouseMotionListener(handler);
+		centerPanel.addMouseListener(handler);
+		// Clear drawings
+		clearAll.addActionListener(e -> {
+			centerPanel.repaint();
+		});
 
-    private void drawAllShapes(Graphics g) {
-        for (ShapeData s : shapes) {
-            g.setColor(s.color);
-            drawShape(g, s.type, s.x1, s.y1, s.x2, s.y2);
-        }
-        if (isDragging) {
-            g.setColor(currentColor);
-            drawShape(g, currentShape, startX, startY, endX, endY);
-        }
-    }
+		setVisible(true);
+	}
 
-    private void drawShape(Graphics g, int type, int x1, int y1, int x2, int y2) {
-        int x = Math.min(x1, x2);
-        int y = Math.min(y1, y2);
-        int width = Math.abs(x2 - x1);
-        int height = Math.abs(y2 - y1);
+	private class ComponentWrangler extends MouseInputAdapter {
 
-        switch (type) {
-            case 1 -> g.drawRect(x, y, width, height); // Rectangle
-            case 2 -> g.drawOval(x, y, width, height); // Circle
-            case 3 -> g.drawLine(x1, y1, x2, y2);     // Line
-        }
-    }
+		private JPanel centerPanel;
 
-    // ------------------------
-    // Menu bar
-    // ------------------------
-    private JMenuBar createMenuBar() {
-        JMenuBar menubar = new JMenuBar();
+		private JRadioButton square;
+		private JRadioButton oval;
 
-        // File menu
-        JMenu fileMenu = new JMenu("File");
-        fileMenu.setMnemonic(KeyEvent.VK_F);
-        JMenuItem exitItem = new JMenuItem("Exit");
-        exitItem.setMnemonic(KeyEvent.VK_X);
-        exitItem.addActionListener(e -> System.exit(0));
-        fileMenu.add(exitItem);
+		private JRadioButton fill;
 
-        // Shape menu
-        JMenu shapeMenu = new JMenu("Shape");
-        shapeMenu.setMnemonic(KeyEvent.VK_S);
+		public ComponentWrangler(JPanel centerPanel, JRadioButton square, JRadioButton oval, JRadioButton fill,
+				JRadioButton outline) {
 
-        JMenuItem rectItem = new JMenuItem("Rectangle");
-        JMenuItem circleItem = new JMenuItem("Circle");
-        JMenuItem lineItem = new JMenuItem("Line");
+			this.centerPanel = centerPanel;
+			this.square = square;
+			this.oval = oval;
+			this.fill = fill;
+		}
 
-        rectItem.addActionListener(e -> currentShape = 1);
-        circleItem.addActionListener(e -> currentShape = 2);
-        lineItem.addActionListener(e -> currentShape = 3);
+		@Override
+		public void mousePressed(MouseEvent e) {
+			drawShape(e);
+		}
 
-        shapeMenu.add(rectItem);
-        shapeMenu.add(circleItem);
-        shapeMenu.add(lineItem);
+		@Override
+		public void mouseDragged(MouseEvent e) {
+			drawShape(e);
+		}
 
-        menubar.add(fileMenu);
-        menubar.add(shapeMenu);
+		private void drawShape(MouseEvent e) {
 
-        return menubar;
-    }
+			Graphics g = centerPanel.getGraphics();
+			g.setColor(currentColor);
+			int x = e.getX();
+			int y = e.getY();
 
-    // ------------------------
-    // Mouse handlers
-    // ------------------------
-    private void addMouseHandlers() {
-        MouseAdapter mouseHandler = new MouseAdapter() {
-            @Override
-            public void mousePressed(MouseEvent e) {
-                startX = e.getX();
-                startY = e.getY();
-                endX = startX;
-                endY = startY;
-                isDragging = true;
-            }
+			if (square.isSelected()) {
 
-            @Override
-            public void mouseReleased(MouseEvent e) {
-                if (isDragging) {
-                    endX = e.getX();
-                    endY = e.getY();
-                    shapes.add(new ShapeData(currentShape, startX, startY, endX, endY, currentColor));
-                    isDragging = false;
-//                    centerPanel.repaint();
-                }
-            }
+				if (fill.isSelected()) {
+					g.fillRect(x, y, 10, 10);
+				} else {
+					g.drawRect(x, y, 10, 10);
+				}
+			}
 
-            @Override
-            public void mouseDragged(MouseEvent e) {
-                endX = e.getX();
-                endY = e.getY();
-                centerPanel.repaint();
-            }
-        };
-        centerPanel.addMouseListener(mouseHandler);
-        centerPanel.addMouseMotionListener(mouseHandler);
-    }
+			if (oval.isSelected()) {
 
-    // ------------------------
-    // Main
-    // ------------------------
-    public static void main(String[] args) {
-        SwingUtilities.invokeLater(Lab9::new);
-    }
+				if (fill.isSelected()) {
+					g.fillOval(x, y, 10, 10);
+				} else {
+					g.drawOval(x, y, 10, 10);
+				}
+			}
+		}
+	}
+
+	public static void main(String[] args) {
+		SwingUtilities.invokeLater(Lab9::new);
+	}
 }
