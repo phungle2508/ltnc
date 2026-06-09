@@ -1,4 +1,4 @@
-package lab9;
+package lab.lab9;
 
 import java.awt.BorderLayout;
 import java.awt.Color;

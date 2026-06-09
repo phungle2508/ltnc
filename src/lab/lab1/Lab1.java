@@ -1,4 +1,4 @@
-package lab1;
+package lab.lab1;
 
 public class Lab1 {
 	public int roundNumber(float n) {

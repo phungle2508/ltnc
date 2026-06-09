@@ -1,4 +1,4 @@
-package lab6;
+package lab.lab6;
 
 import java.util.ArrayList;
 import java.util.Collections;

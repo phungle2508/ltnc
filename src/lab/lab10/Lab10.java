@@ -1,4 +1,4 @@
-package lab10;
+package lab.lab10;
 
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;

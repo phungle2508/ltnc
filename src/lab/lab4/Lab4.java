@@ -1,4 +1,4 @@
-package lab4;
+package lab.lab4;
 
 public class Lab4 {
 	private int column = 5;
