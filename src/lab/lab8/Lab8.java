@@ -100,7 +100,7 @@ public class Lab8 extends JFrame {
 	private class ComponentWrangler extends MouseInputAdapter {
 
 		private JPanel centerPanel;
-
+		
 		private JRadioButton square;
 		private JRadioButton oval;
 
