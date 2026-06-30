@@ -67,7 +67,6 @@ public class Bai23 extends JFrame {
 
         JPanel jPanelCenter = new JPanel();
         jPanelCenter.setBackground(Color.yellow);
-
         ComponentWraggler componentWraggler = new ComponentWraggler(jPanelCenter, jRadioButtonSquare, jRadioButtonOval,
                 jRadioButtonFill, jRadioButtonOutLine);
         jPanelCenter.addMouseListener(componentWraggler);

@@ -4,25 +4,14 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.util.ArrayList;
+import java.util.List;
 
 public class Bai24a extends JFrame {
-    public Bai24a() {
-        setTitle("Draw Shapes");
-        setDefaultCloseOperation(EXIT_ON_CLOSE);
-        setSize(700, 600);
-        setLocationRelativeTo(null);
-
-        DrawPanel panel = new DrawPanel();
-        add(panel);
-
-        setVisible(true);
-    }
-
-    static class ShapeInfo {
+    class ShapeInfo {
         int x1, y1, x2, y2;
         String type;
 
-        ShapeInfo(int x1, int y1, int x2, int y2, String type) {
+        public ShapeInfo(int x1, int y1, int x2, int y2, String type) {
             this.x1 = x1;
             this.y1 = y1;
             this.x2 = x2;
@@ -31,90 +20,108 @@ public class Bai24a extends JFrame {
         }
     }
 
-    static class DrawPanel extends JPanel {
-        ArrayList<ShapeInfo> shapes = new ArrayList<>();
+    List<ShapeInfo> shapes = new ArrayList<>();
 
-        int startX, startY, currentX, currentY;
-        boolean drawing = false;
-        String currentType = "line";
+    int startX, startY, currentX, currentY;
+    boolean drawing = false;
+    String currentType = "line";
 
-        DrawPanel() {
-            setBackground(Color.WHITE);
+    public Bai24a() {
+        setTitle("Draw Shapes");
+        setDefaultCloseOperation(EXIT_ON_CLOSE);
+        setSize(700, 600);
+        setLocationRelativeTo(null);
 
-            MouseAdapter mouse = new MouseAdapter() {
-                @Override
-                public void mousePressed(MouseEvent e) {
-                    if (!drawing) {
-                        startX = e.getX();
-                        startY = e.getY();
-                        currentX = startX;
-                        currentY = startY;
+        add(drawPanel());
 
-                        if (e.isShiftDown()) {
-                            currentType = "line";
-                        } else if (e.isControlDown()) {
-                            currentType = "circle";
-                        } else if (e.isAltDown()) {
-                            currentType = "rect";
-                        }
+        setVisible(true);
+    }
 
-                        drawing = true;
-                    } else {
-                        shapes.add(new ShapeInfo(startX, startY, currentX, currentY, currentType));
-                        drawing = false;
-                    }
+    private JPanel drawPanel() {
+        JPanel panel = new JPanel() {
+            @Override
+            protected void paintComponent(Graphics g) {
+                super.paintComponent(g);
 
-                    repaint();
+                g.setColor(Color.BLACK);
+                for (ShapeInfo s : shapes) {
+                    drawShape(g, s.x1, s.y1, s.x2, s.y2, s.type);
                 }
 
-                @Override
-                public void mouseMoved(MouseEvent e) {
-                    if (drawing) {
-                        currentX = e.getX();
-                        currentY = e.getY();
-                        repaint();
-                    }
+                if (drawing) {
+                    g.setColor(Color.RED);
+                    drawShape(g, startX, startY, currentX, currentY, currentType);
                 }
-            };
+            }
+        };
 
-            addMouseListener(mouse);
-            addMouseMotionListener(mouse);
-        }
+        panel.setBackground(Color.WHITE);
 
-        @Override
-        protected void paintComponent(Graphics g) {
-            super.paintComponent(g);
+        MouseAdapter mouse = new MouseAdapter() {
+            @Override
+            public void mousePressed(MouseEvent e) {
+                if (!drawing) {
+                    startX = e.getX();
+                    startY = e.getY();
+                    currentX = startX;
+                    currentY = startY;
 
-            for (ShapeInfo s : shapes) {
-                drawShape(g, s.x1, s.y1, s.x2, s.y2, s.type);
+                    if (e.isShiftDown()) {
+                        currentType = "line";
+                    } else if (e.isControlDown()) {
+                        currentType = "circle";
+                    } else if (e.isAltDown()) {
+                        currentType = "rect";
+                    }
+
+                    drawing = true;
+                } else {
+                    shapes.add(new ShapeInfo(startX, startY, currentX, currentY, currentType));
+                    drawing = false;
+                }
+
+                panel.repaint();
             }
 
-            if (drawing) {
-                g.setColor(Color.RED);
-                drawShape(g, startX, startY, currentX, currentY, currentType);
+            @Override
+            public void mouseMoved(MouseEvent e) {
+                if (drawing) {
+                    currentX = e.getX();
+                    currentY = e.getY();
+                    panel.repaint();
+                }
             }
-        }
+        };
 
-        private void drawShape(Graphics g, int x1, int y1, int x2, int y2, String type) {
-            int x = Math.min(x1, x2);
-            int y = Math.min(y1, y2);
-            int w = Math.abs(x2 - x1);
-            int h = Math.abs(y2 - y1);
+        panel.addMouseListener(mouse);
+        panel.addMouseMotionListener(mouse);
 
-            switch (type) {
-                case "line":
-                    g.drawLine(x1, y1, x2, y2);
-                    break;
+        return panel;
+    }
 
-                case "rect":
-                    g.drawRect(x, y, w, h);
-                    break;
+    private void drawShape(Graphics g, int x1, int y1, int x2, int y2, String type) {
+        int x = Math.min(x1, x2);
+        int y = Math.min(y1, y2);
+        int w = Math.abs(x2 - x1);
+        int h = Math.abs(y2 - y1);
 
-                case "circle":
-                    int size = Math.min(w, h);
-                    g.drawOval(x, y, size, size);
-                    break;
-            }
+        switch (type) {
+            case "line":
+                g.drawLine(x1, y1, x2, y2);
+                break;
+            case "rect":
+                g.drawRect(x, y, w, h);
+                break;
+            case "circle":
+                int radius = (int) Math.sqrt(
+                        Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
+
+                g.drawOval(
+                        x1 - radius,
+                        y1 - radius,
+                        radius * 2,
+                        radius * 2);
+                break;
         }
     }
 

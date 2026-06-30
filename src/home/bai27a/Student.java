@@ -1,13 +1,15 @@
-package home.bai27a.model;
+package home.bai27a;
 
-public class Course {
+import java.util.List;
+
+public class Student {
     String id, name;
-    float grade;
+    List<Course> course;
 
-    public Course(String id, String name, float grade) {
+    public Student(String id, String name, List<Course> course) {
         this.id = id;
         this.name = name;
-        this.grade = grade;
+        this.course = course;
     }
 
     public String getId() {
@@ -26,12 +28,12 @@ public class Course {
         this.name = name;
     }
 
-    public float getGrade() {
-        return this.grade;
+    public List<Course> getCourse() {
+        return this.course;
     }
 
-    public void setGrade(float grade) {
-        this.grade = grade;
+    public void setCourse(List<Course> course) {
+        this.course = course;
     }
 
 }

@@ -42,8 +42,9 @@ public class CDMange {
         Arrays.sort(cdArr, new Comparator<CD>() {
 
             @Override
-            public int compare(CD arg0, CD arg1) {
-                return Double.compare(arg0.price, arg1.price);
+            public int compare(CD o1, CD o2) {
+                // TODO Auto-generated method stub
+                return 0;
             }
         });
     }

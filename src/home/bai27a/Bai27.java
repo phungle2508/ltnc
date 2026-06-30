@@ -1,5 +1,8 @@
 package home.bai27a;
 
+import java.awt.*;
+import java.util.ArrayList;
+
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
@@ -16,64 +19,49 @@ import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 import javax.swing.table.DefaultTableModel;
 
-import home.bai27a.model.Course;
-import home.bai27a.model.SchoolManage;
-import home.bai27a.model.Student;
-
-import java.awt.*;
-import java.awt.event.KeyEvent;
-import java.util.ArrayList;
-import java.util.List;
-
 public class Bai27 extends JFrame {
-    SchoolManage schoolManage;
+    SchoolManage schoolManage = new SchoolManage(new ArrayList<>());
     JPanel cardPanel;
     CardLayout cardLayout;
-    DefaultTableModel courseModel;
-    JTable courseTable;
-    JTextField courseJTextFieldStudentID,
-            courseJTextFieldStudentName,
-            courseJTextFieldCourseID,
+    JTextField courseJTextFieldStudentID, courseJTextFieldStudentName, courseJTextFieldCourseID,
             courseJTextFieldCourseName;
-
-    DefaultTableModel gradeModel;
-    JTable gradeTable;
-    JComboBox<String> gradeJComboBoxCourseNames;
+    JComboBox<String> gradeJComboBoxCoursesName = new JComboBox<>();
     JTextField gradeJTextFieldStudentID,
             gradeJTextFieldStudentName,
-            gradeJTextFieldCourseGrade;
+            gradeJTextFieldGrade;
+
+    DefaultTableModel courseDefaultTableModel, gradeDefaultTableModel;
+    JTable courseJTable, gradeJTable;
 
     public Bai27() {
-        schoolManage = new SchoolManage(new ArrayList<>());
         setVisible(true);
+        setTitle("Khoa CNTT");
         setSize(600, 600);
-        setDefaultCloseOperation(EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
-        setTitle("Khoa Công Nghệ Thông Tin");
+        setDefaultCloseOperation(EXIT_ON_CLOSE);
+
         setLayout(new BorderLayout());
-        add(toolBarPanel(), BorderLayout.NORTH);
-        add(cardPanel(), BorderLayout.CENTER);
+        add(menuBar(), BorderLayout.NORTH);
+        cardPanel = cardPanel();
+        add(cardPanel, BorderLayout.CENTER);
     }
 
-    private JMenuBar toolBarPanel() {
-        JMenuBar jMenuBar = new JMenuBar();
+    private JMenuBar menuBar() {
+        JMenuBar menuBar = new JMenuBar();
         JMenu jMenuFile = new JMenu("File");
         JMenuItem jMenuFileItemExit = new JMenuItem("Exit");
-        JMenu jMenuInfoManage = new JMenu("Quản lý sinh viên");
-        JMenuItem jMenuInfoManageItemCourse = new JMenuItem("Quản lý môn học");
-        jMenuInfoManageItemCourse.setMnemonic(KeyEvent.VK_M);
-        jMenuInfoManageItemCourse.addActionListener(e -> cardLayout.show(cardPanel, "Course"));
-        JMenuItem jMenuInfoManageItemGrade = new JMenuItem("Quản lý điểm");
-        jMenuInfoManageItemGrade.setMnemonic(KeyEvent.VK_D);
-        jMenuInfoManageItemGrade.setDisplayedMnemonicIndex(8);
-        jMenuInfoManageItemGrade.addActionListener(e -> cardLayout.show(cardPanel, "Grade"));
         jMenuFile.add(jMenuFileItemExit);
+        menuBar.add(jMenuFile);
+
+        JMenu jMenuInfoManage = new JMenu("Quan Ly Sinh Vien");
+        JMenuItem jMenuInfoManageItemCourse = new JMenuItem("Quan Ly Mon Hoc");
+        jMenuInfoManageItemCourse.addActionListener(e -> cardLayout.show(cardPanel, "Course"));
+        JMenuItem jMenuInfoManageItemGrade = new JMenuItem("Quan Ly Diem");
+        jMenuInfoManageItemGrade.addActionListener(e -> cardLayout.show(cardPanel, "Grade"));
         jMenuInfoManage.add(jMenuInfoManageItemCourse);
         jMenuInfoManage.add(jMenuInfoManageItemGrade);
-        jMenuBar.add(jMenuFile);
-        jMenuBar.add(jMenuInfoManage);
-        return jMenuBar;
-
+        menuBar.add(jMenuInfoManage);
+        return menuBar;
     }
 
     private JPanel cardPanel() {
@@ -86,162 +74,163 @@ public class Bai27 extends JFrame {
 
     }
 
-    private Component gradePanel() {
-        JPanel gradePanel = new JPanel(new BorderLayout());
-
-        JPanel northPanel = new JPanel(new BorderLayout());
-        JPanel jPanelAdd = new JPanel(new GridLayout(4, 2));
-        jPanelAdd
-                .setBorder(BorderFactory.createCompoundBorder(
-                        BorderFactory.createTitledBorder("Them Diem"),
-                        BorderFactory.createEmptyBorder(10, 100, 10, 100)));
-        JLabel jLabelStudentID = new JLabel("MSSV");
-        gradeJTextFieldStudentID = new JTextField();
-        JLabel jLabelStudentName = new JLabel("Ho Va Ten");
-        gradeJTextFieldStudentName = new JTextField();
-        JLabel jLabelCourseID = new JLabel("Ma Mon Hoc");
-        gradeJComboBoxCourseNames = new JComboBox<>(schoolManage.getAllCourseName());
-        JLabel jLabelCourseName = new JLabel("Ten Mon Hoc");
-        gradeJTextFieldCourseGrade = new JTextField();
-        jPanelAdd.add(jLabelStudentID);
-        jPanelAdd.add(gradeJTextFieldStudentID);
-        jPanelAdd.add(jLabelStudentName);
-        jPanelAdd.add(gradeJTextFieldStudentName);
-        jPanelAdd.add(jLabelCourseID);
-        jPanelAdd.add(gradeJComboBoxCourseNames);
-        jPanelAdd.add(jLabelCourseName);
-        jPanelAdd.add(gradeJTextFieldCourseGrade);
-        JPanel jPanelAction = new JPanel();
-        jPanelAction
-                .setBorder(BorderFactory.createCompoundBorder(
-                        BorderFactory.createTitledBorder("Thao Tac"),
-                        BorderFactory.createEmptyBorder(10, 100, 10, 100)));
-        JButton buttonAdd = new JButton("Them Diem");
-        buttonAdd.addActionListener(e -> gradeAddGrade());
-        JButton buttonFind = new JButton("Tim Sinh Vien");
-        buttonFind.addActionListener(e -> gradeFindStudent());
-        jPanelAction.add(buttonAdd);
-        jPanelAction.add(buttonFind);
-        northPanel.add(jPanelAdd, BorderLayout.NORTH);
-        northPanel.add(jPanelAction, BorderLayout.CENTER);
-
-        gradePanel.add(northPanel, BorderLayout.NORTH);
-
-        gradeModel = new DefaultTableModel(new String[] { "SoTT", "Ten Mon Hoc", "Diem" }, 0);
-        gradeTable = new JTable(gradeModel);
-        gradePanel.add(new JScrollPane(gradeTable), BorderLayout.CENTER);
-        return gradePanel;
-    }
-
-    private void gradeFindStudent() {
-        Student student = schoolManage.findStudent(gradeJTextFieldStudentID.getText());
-        if (student != null) {
-            gradeModel.setRowCount(0);
-            List<Course> courses = student.getCourses();
-
-            for (int i = 0; i < courses.size(); i++) {
-                gradeModel.addRow(new String[] { i + "", courses.get(i).getName(), courses.get(i).getGrade() + "" });
-            }
-        } else {
-            JOptionPane.showConfirmDialog(this, "Khong tim thay sinh vien");
-        }
-    }
-
-    private void gradeAddGrade() {
-        boolean checkIfAddGradeSuccess = schoolManage.addGrade(gradeJTextFieldStudentID.getText(),
-                gradeJComboBoxCourseNames.getSelectedItem().toString(), gradeJTextFieldCourseGrade.getText());
-        if (checkIfAddGradeSuccess) {
-            JOptionPane.showConfirmDialog(this, "Them Diem Thanh Cong");
-            gradeFindStudent();
-        } else {
-            JOptionPane.showConfirmDialog(this, "Them Diem That Bai");
-        }
-    }
-
-    private Component coursePanel() {
+    private JPanel coursePanel() {
         JPanel coursePanel = new JPanel(new BorderLayout());
 
         JPanel northPanel = new JPanel(new BorderLayout());
-        JPanel jPanelAdd = new JPanel(new GridLayout(4, 2));
-        jPanelAdd
-                .setBorder(BorderFactory.createCompoundBorder(
-                        BorderFactory.createTitledBorder("Them Mon Hoc"),
-                        BorderFactory.createEmptyBorder(10, 100, 10, 100)));
-        JLabel jLabelStudentID = new JLabel("MSSV");
+
+        JPanel jPanelADD = new JPanel(new GridLayout(4, 2));
+        jPanelADD.setBorder(BorderFactory.createCompoundBorder(BorderFactory.createTitledBorder("Them Mon Hoc"),
+                BorderFactory.createEmptyBorder(0, 100, 0, 100)));
+        JLabel jLabelMSSV = new JLabel("MSSV");
         courseJTextFieldStudentID = new JTextField();
-        JLabel jLabelStudentName = new JLabel("Ho Va Ten");
+        JLabel jLabelHoVaTen = new JLabel("Ho Va Ten");
         courseJTextFieldStudentName = new JTextField();
-        JLabel jLabelCourseID = new JLabel("Ma Mon Hoc");
+        JLabel jLabelMaMonHoc = new JLabel("Ma Mon Hoc");
         courseJTextFieldCourseID = new JTextField();
-        JLabel jLabelCourseName = new JLabel("Ten Mon Hoc");
+        JLabel jLabelTenMonHoc = new JLabel("Ten Mon Hoc");
         courseJTextFieldCourseName = new JTextField();
-        jPanelAdd.add(jLabelStudentID);
-        jPanelAdd.add(courseJTextFieldStudentID);
-        jPanelAdd.add(jLabelStudentName);
-        jPanelAdd.add(courseJTextFieldStudentName);
-        jPanelAdd.add(jLabelCourseID);
-        jPanelAdd.add(courseJTextFieldCourseID);
-        jPanelAdd.add(jLabelCourseName);
-        jPanelAdd.add(courseJTextFieldCourseName);
+        jPanelADD.add(jLabelMSSV);
+        jPanelADD.add(courseJTextFieldStudentID);
+        jPanelADD.add(jLabelHoVaTen);
+        jPanelADD.add(courseJTextFieldStudentName);
+        jPanelADD.add(jLabelMaMonHoc);
+        jPanelADD.add(courseJTextFieldCourseID);
+        jPanelADD.add(jLabelTenMonHoc);
+        jPanelADD.add(courseJTextFieldCourseName);
+        northPanel.add(jPanelADD, BorderLayout.NORTH);
+
         JPanel jPanelAction = new JPanel();
-        jPanelAction
-                .setBorder(BorderFactory.createCompoundBorder(
-                        BorderFactory.createTitledBorder("Thao Tac"),
-                        BorderFactory.createEmptyBorder(10, 100, 10, 100)));
-        JButton buttonAdd = new JButton("Them Mon Hoc");
-        buttonAdd.addActionListener(e -> courseAddStudent());
+        jPanelAction.setBorder(BorderFactory.createCompoundBorder(BorderFactory.createTitledBorder("Thao Tac"),
+                BorderFactory.createEmptyBorder(10, 100, 10, 100)));
+        JButton buttonADD = new JButton("Them Mon Hoc");
+        buttonADD.addActionListener(e -> courseAddStudent());
         JButton buttonFind = new JButton("Tim Sinh Vien");
         buttonFind.addActionListener(e -> courseFindStudent());
-        jPanelAction.add(buttonAdd);
+        jPanelAction.add(buttonADD);
         jPanelAction.add(buttonFind);
-        northPanel.add(jPanelAdd, BorderLayout.NORTH);
         northPanel.add(jPanelAction, BorderLayout.CENTER);
-
         coursePanel.add(northPanel, BorderLayout.NORTH);
 
-        courseModel = new DefaultTableModel(new String[] { "SoTT", "Ten Mon Hoc", "Diem" }, 0);
-        courseTable = new JTable(courseModel);
-        coursePanel.add(new JScrollPane(courseTable), BorderLayout.CENTER);
+        courseDefaultTableModel = new DefaultTableModel(new String[] { "STT", "Ten Mon Hoc", "Diem" }, 0);
+        courseJTable = new JTable(courseDefaultTableModel);
+        coursePanel.add(new JScrollPane(courseJTable), BorderLayout.CENTER);
         return coursePanel;
+
     }
 
     private void courseAddStudent() {
-        boolean checkIfAddSuccess = schoolManage.addAtCoursePanel(courseJTextFieldCourseID.getText(),
-                courseJTextFieldCourseName
+        boolean ifStudentAddOrCourseAddSuccess = schoolManage.studentAddOrCourseAdd(courseJTextFieldStudentID.getText(),
+                courseJTextFieldStudentName
                         .getText(),
-                courseJTextFieldStudentID.getText(), courseJTextFieldStudentName.getText());
-        if (checkIfAddSuccess) {
-            JOptionPane.showConfirmDialog(this, "Them Mon Hoc Thanh Cong");
+                courseJTextFieldCourseID.getText(), courseJTextFieldCourseName.getText());
+        if (ifStudentAddOrCourseAddSuccess) {
+            JOptionPane.showConfirmDialog(this, "Thanh Cong");
             courseFindStudent();
+
         } else {
-            JOptionPane.showConfirmDialog(this, "Khong tim thay sinh vien");
+            JOptionPane.showConfirmDialog(this, "That Bai");
         }
     }
 
     private void courseFindStudent() {
-        Student student = schoolManage.findStudent(courseJTextFieldStudentID.getText());
-        if (student != null) {
-            courseModel.setRowCount(0);
-            List<Course> courses = student.getCourses();
-            gradeJComboBoxCourseNames.removeAllItems();
-
-            for (int i = 0; i < courses.size(); i++) {
-                courseModel.addRow(new String[] { i + "", courses.get(i).getName(), courses.get(i).getGrade() + "" });
-                gradeJComboBoxCourseNames.addItem(courses.get(i).getName());
-            }
-        } else {
+        Student studentFound = schoolManage.findStudent(courseJTextFieldStudentID.getText());
+        if (studentFound == null) {
             JOptionPane.showConfirmDialog(this, "Khong tim thay sinh vien");
+        } else {
+            courseDefaultTableModel.setRowCount(0);
+            gradeJComboBoxCoursesName.removeAllItems();
+            for (Course course : studentFound.getCourse()) {
+                courseDefaultTableModel.addRow(new String[] { course.getId(), course.getName(),
+                        course.getGrade() + "" });
+                gradeJComboBoxCoursesName.addItem((course.getName()));
+            }
         }
     }
 
-    private Component mainPanel() {
-        JPanel mainPanel = new JPanel();
-        JLabel jLabel = new JLabel("Quản lý sinh viên khoa CNTT");
+    private void gradeAddGrade() {
+        boolean ifGradeAddSuccess = schoolManage.addGrade(gradeJTextFieldStudentID.getText(),
+                gradeJComboBoxCoursesName
+                        .getSelectedItem().toString(),
+
+                gradeJTextFieldGrade.getText());
+        if (ifGradeAddSuccess) {
+            JOptionPane.showConfirmDialog(this, "Thanh Cong");
+            gradeFindStudent();
+        } else {
+            JOptionPane.showConfirmDialog(this, "That Bai");
+        }
+    }
+
+    private void gradeFindStudent() {
+        Student studentFound = schoolManage.findStudent(gradeJTextFieldStudentID.getText());
+        if (studentFound == null) {
+            JOptionPane.showConfirmDialog(this, "Khong tim thay sinh vien");
+        } else {
+            gradeDefaultTableModel.setRowCount(0);
+            for (Course course : studentFound.getCourse()) {
+                gradeDefaultTableModel.addRow(new String[] { course.getId(), course.getName(),
+                        course.getGrade() + "" });
+            }
+        }
+    }
+
+    private JPanel gradePanel() {
+        JPanel gradePanel = new JPanel(new BorderLayout());
+
+        JPanel northPanel = new JPanel(new BorderLayout());
+
+        JPanel jPanelADD = new JPanel(new GridLayout(4, 2));
+        jPanelADD.setBorder(BorderFactory.createCompoundBorder(BorderFactory.createTitledBorder("Them Diem"),
+                BorderFactory.createEmptyBorder(0, 100, 0, 100)));
+        JLabel jLabelMSSV = new JLabel("MSSV");
+        gradeJTextFieldStudentID = new JTextField();
+        JLabel jLabelHoVaTen = new JLabel("Ho Va Ten");
+        gradeJTextFieldStudentName = new JTextField();
+        JLabel jLabelTenMonHoc = new JLabel("Ten Mon Hoc");
+        gradeJComboBoxCoursesName = new JComboBox<>(schoolManage.getAllCoursesName());
+        JLabel jLabelDiem = new JLabel("Diem");
+        gradeJTextFieldGrade = new JTextField();
+        jPanelADD.add(jLabelMSSV);
+        jPanelADD.add(gradeJTextFieldStudentID);
+        jPanelADD.add(jLabelHoVaTen);
+        jPanelADD.add(gradeJTextFieldStudentName);
+        jPanelADD.add(jLabelTenMonHoc);
+        jPanelADD.add(gradeJComboBoxCoursesName);
+        jPanelADD.add(jLabelDiem);
+        jPanelADD.add(gradeJTextFieldGrade);
+        northPanel.add(jPanelADD, BorderLayout.NORTH);
+
+        JPanel jPanelAction = new JPanel();
+        jPanelAction.setBorder(BorderFactory.createCompoundBorder(BorderFactory.createTitledBorder("Thao Tac"),
+                BorderFactory.createEmptyBorder(10, 100, 10, 100)));
+        JButton buttonADD = new JButton("Them Mon Hoc");
+        buttonADD.addActionListener(e -> gradeAddGrade());
+        JButton buttonFind = new JButton("Tim Sinh Vien");
+        buttonFind.addActionListener(e -> gradeFindStudent());
+        jPanelAction.add(buttonADD);
+        jPanelAction.add(buttonFind);
+        northPanel.add(jPanelAction, BorderLayout.CENTER);
+        gradePanel.add(northPanel, BorderLayout.NORTH);
+
+        gradeDefaultTableModel = new DefaultTableModel(new String[] { "STT", "Ten Mon Hoc", "Diem" }, 0);
+        gradeJTable = new JTable(gradeDefaultTableModel);
+        gradePanel.add(new JScrollPane(gradeJTable), BorderLayout.CENTER);
+        return gradePanel;
+
+    }
+
+    private JPanel mainPanel() {
+
+        JPanel mainPanel = new JPanel(new BorderLayout());
+        JLabel jLabel = new JLabel("Quan Ly Sinh Vien K.CNTT");
+        mainPanel.add(jLabel, BorderLayout.CENTER);
         jLabel.setHorizontalAlignment(SwingUtilities.CENTER);
-        return mainPanel.add(jLabel);
+        return mainPanel;
     }
 
     public static void main(String[] args) {
+
         SwingUtilities.invokeLater(Bai27::new);
     }
 }
